@@ -1,0 +1,68 @@
+// 白天
+@bg_color_daily: #ffffff;
+@text_color_daily: #535353;
+@subText_color_bg_daily: #f1eff2;
+@subText_color_daily: #c1c0c1;
+@error_color_daily: #ffffff;
+@list_color_daily:#000000;
+@input_color_bg_daily:#ffffff;
+//夜晚
+@bg_color_dark: #24242F;
+@text_color_dark: #ffffff;
+@subText_color_bg_dark: #31313F;
+@subText_color_dark: #939393;
+@toast_color_dark: #000000b3;
+@list_color_dark:#ffffff;
+@input_color_bg_dark:#ffffff;
+
+// 模式切换
+.styleChange(@theme) {
+  // 定义页面显示各种颜色，拼接theme主题
+  @bg_color_: "bg_color_@{theme}";
+  @text_color_: "text_color_@{theme}";
+  @subText_color_bg_: "subText_color_bg_@{theme}";
+  @subText_color_: "subText_color_@{theme}";
+  @toast_color_: "toast_color_@{theme}";
+  @list_color_: "list_color_@{theme}";
+  @input_color_bg_:"input_color_bg_@{theme}";
+  .Header_no_open {
+    background-color: @@bg_color_; //使用 @@style 双@的方法取值
+    color: @@text_color_;
+
+    .subText {
+      background-color: @@subText_color_bg_;
+      color: @@subText_color_;
+    }
+
+    .subText_text {
+      color: @@subText_color_;
+    }
+
+    .list_text{
+      color: @@list_color_;
+    }
+
+    /deep/.van-cell.van-field ,input{
+      background-color: @@input_color_bg_;
+      color: @@subText_color_;
+    }
+  }
+
+
+}
+
+.this_dark {
+  .styleChange(dark);
+
+  .active {
+    color: #ffffff
+  }
+
+  .no_active_red {
+    color: #ffffff
+  }
+}
+
+.this_daily {
+  .styleChange(daily);
+}
