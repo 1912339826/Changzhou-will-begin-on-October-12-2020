@@ -25,6 +25,8 @@ import AskDetails from '@/pages/AskDetails/index.vue'
 import MyQuestions from '@/pages/MyQuestions/index.vue'
 // 我的等级
 import MyGrades from '@/pages/MyGrades/index.vue'
+// 文稿详情
+import ManuscriptsDetails from '@/pages/ManuscriptsDetails/index.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -87,6 +89,11 @@ export default new Router({
       path: '/MyGrades',
       name: 'MyGrades',
       component: MyGrades
+    },
+    {
+      path: '/ManuscriptsDetails',
+      name: 'ManuscriptsDetails',
+      component: ManuscriptsDetails
     }
   ]
 })

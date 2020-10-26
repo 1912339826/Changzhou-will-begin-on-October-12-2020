@@ -4,7 +4,9 @@
     <div class="title">
       8月幼儿园要求，无论什么病都要去 定点医院出具复课证明，是否合理？
     </div>
-    <div class="place"><span class="list_text">看常州网友</span><span>2020-8-31</span></div>
+    <div class="place">
+      <span class="list_text">看常州网友</span><span>2020-8-31</span>
+    </div>
     <div style="height: 6px; opacity: 1" class="subText"></div>
     <div class="dynamic">
       <img src="../../../static/images/AskDetails_icon.png" alt="" />
@@ -150,12 +152,12 @@ export default {
     }
   }
   .share {
-      padding-top: 5vw;
-      padding-left: 25vw;
-      padding-right: 25vw;
-      padding-bottom: 10vw;
-      display: flex;
-      justify-content: space-between;
+    padding-top: 5vw;
+    padding-left: 25vw;
+    padding-right: 25vw;
+    padding-bottom: 10vw;
+    display: flex;
+    justify-content: space-between;
     img {
       width: 8vw;
       height: 8vw;
