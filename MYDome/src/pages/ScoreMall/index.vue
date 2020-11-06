@@ -11,13 +11,18 @@
       <div class="gorecord" @click="gorecord">兑换记录</div>
     </div>
     <div class="box">
-      <div class="list" v-for="(item, index) in 5" :key="index" @click="goproductDetails">
+      <div
+        class="list"
+        v-for="(item, index) in AppGoodList"
+        :key="index"
+        @click="goproductDetails"
+      >
         <img
           src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3392888803,907475590&fm=26&gp=0.jpg"
           alt=""
         />
-        <p class="title">XXXXX11111111111111X</p>
-        <div class="price"><span>2650</span><span>积分</span></div>
+        <p class="title">{{item.product_name}}</p>
+        <div class="price"><span>{{item.price}}</span><span>积分</span></div>
       </div>
     </div>
   </div>
@@ -32,19 +37,30 @@ export default {
   },
   props: {},
   data() {
-    return {};
+    return {
+      AppGoodList: [],
+    };
   },
-  created() {},
+  created() {
+    this.getAppGoodList();
+  },
   mounted() {},
   activated() {},
   update() {},
   methods: {
-    gorecord(){
-      this.$router.push("/ScoreMallRecord")
+    gorecord() {
+      this.$router.push("/ScoreMallRecord");
     },
-    goproductDetails(){
-      this.$router.push("/productDetails")
-    }
+    goproductDetails() {
+      this.$router.push("/productDetails");
+    },
+    async getAppGoodList() {
+      let res = await this.$req(window.api.getAppGoodList, {
+        page: 1,
+      });
+      console.log(res.data.data.data.data);
+      this.AppGoodList = res.data.data.data.data;
+    },
   },
   filters: {},
   computed: {},

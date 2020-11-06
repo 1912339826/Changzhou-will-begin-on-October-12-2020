@@ -18,9 +18,13 @@ export default {
       // 根据链接中的参数，判断现在是白天或者夜间模式
       // this_dark
       // this_daily
+      window.localStorage.setItem("theme", this.theme);
     },
   },
   created() {
+    // 初始化要登录情况下的操作
+    window.localStorage.setItem("action", false);
+    window.localStorage.setItem("theme", this.theme);
     // 您不应在页面加载时或加载后直接运行指纹。 而是使用setTimeout或requestIdleCallback将其延迟几毫秒，以确保指纹一致。
     if (window.requestIdleCallback) {
       requestIdleCallback(() => {
@@ -33,7 +37,7 @@ export default {
     }
 
     if (!window.localStorage.getItem("accessToken")) {
-      this.get_token();
+      // this.get_token();
     }
   },
   methods: {

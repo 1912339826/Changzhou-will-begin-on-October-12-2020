@@ -78,11 +78,20 @@ export default {
   data() {
     return {};
   },
-  created() {},
+  created() {
+    this.getAppGoodhistory();
+  },
   mounted() {},
   activated() {},
   update() {},
-  methods: {},
+  methods: {
+    async getAppGoodhistory() {
+      let res = await this.$req(window.api.getAppGoodhistory, {
+        page: 1,
+      });
+      console.log(res.data.data.data);
+    },
+  },
   filters: {},
   computed: {},
   watch: {},

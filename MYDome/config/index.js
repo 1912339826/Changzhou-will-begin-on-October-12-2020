@@ -10,17 +10,23 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      "/api": {
+        target: "https://kan0519.cztv.tv/",
+        secure: false, //如果是https接口，需要配置这个参数
+        changeOrigin: true
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 8081, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
 
-    
+
     /**
      * Source Maps
      */
@@ -49,7 +55,7 @@ module.exports = {
      * Source Maps
      */
 
-    productionSourceMap: true,
+    productionSourceMap: false,
     // https://webpack.js.org/configuration/devtool/#production
     devtool: '#source-map',
 
@@ -64,6 +70,22 @@ module.exports = {
     // View the bundle analyzer report after build finishes:
     // `npm run build --report`
     // Set to `true` or `false` to always turn it on or off
-    bundleAnalyzerReport: process.env.npm_config_report
+    bundleAnalyzerReport: process.env.npm_config_report,
+    // devServer: {
+    //   port: 8081, // 端口号
+    //   https: true, // https:{type:Boolean}
+    //   open: false, //配置自动启动浏览器
+    //   proxy: {
+    //     '/api': {
+    //       target: 'https://kan0519.cztv.tv/',
+    //       ws: true,
+    //       changeOrigin: true,
+    //       secure: false,
+    //       pathRewrite: {
+    //         '^/api': '/', // rewrite path
+    //       },
+    //     },
+    //   },
+    // }
   }
 }

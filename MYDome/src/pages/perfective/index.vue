@@ -9,7 +9,7 @@
         />
         <div class="right">
           <p>
-            华为华为华为华为华为华为华为华为111111111111111华为华为华为华为华为华为华为华为
+            {{ datas.product_name }}
           </p>
           <div class="stepper">
             <van-stepper theme="round" v-model="value" />
@@ -22,26 +22,35 @@
         <div class="list_ list">
           <span>收货人</span
           ><span>
-            <input type="text" placeholder="收货人姓名" />
+            <input type="text" placeholder="收货人姓名" v-model="name" />
           </span>
         </div>
         <div class="list_ list">
           <span>手机号</span
-          ><span><input type="tel" placeholder="收货人手机号" /></span>
+          ><span
+            ><input type="tel" placeholder="收货人手机号" v-model="phone"
+          /></span>
         </div>
         <div class="list_ list">
-          <span>地址</span><span><input type="text" placeholder="地址" /></span>
+          <span>地址</span
+          ><span><input type="text" placeholder="地址" v-model="addr" /></span>
         </div>
       </template>
 
       <template v-else>
         <div class="title">自取信息</div>
-        <div class="list"><span>联系方式</span><span></span></div>
-        <div class="list"><span>换取地址</span><span></span></div>
-        <div class="list"><span>备注信息</span><span></span></div>
+        <div class="list">
+          <span>联系方式</span><span>{{ phone }}</span>
+        </div>
+        <div class="list">
+          <span>换取地址</span><span>{{ addr }}</span>
+        </div>
+        <div class="list">
+          <span>备注信息</span><span>{{ order_remark }}</span>
+        </div>
       </template>
     </div>
-    <div class="button_yes button_">继续兑换</div>
+    <div class="button_yes button_" @click="goperfective">继续兑换</div>
     <!-- <div class="button_no button_">积分不足</div> -->
   </div>
 </template>
@@ -55,13 +64,61 @@ export default {
   },
   props: {},
   data() {
-    return { value: 1, way: true };
+    return {
+      value: 1,
+      way: true,
+      datas: {},
+      name: "",
+      phone: "",
+      addr: "",
+      order_remark: "",
+    };
   },
-  created() {},
+  created() {
+    // 获取商品详情
+    this.getAppGooddetail();
+  },
   mounted() {},
   activated() {},
   update() {},
-  methods: {},
+  methods: {
+    goperfective() {
+      if (this.name == "") {
+        Toast.fail("收货人不能为空");
+        return;
+      }
+      if (this.phone == "") {
+        Toast.fail("手机号不能为空");
+        return;
+      }
+      if (this.addr == "") {
+        Toast.fail("地址不能为空");
+        return;
+      }
+      this.getAppApporder();
+    },
+    async getAppGooddetail() {
+      let res = await this.$req(window.api.getAppGooddetail, {
+        id: 1,
+      });
+      console.log(res.data.data.data);
+      this.datas = res.data.data.data;
+    },
+    // 商品兑换
+    async getAppApporder() {
+      let res = await this.$req(window.api.getAppApporder, {
+        id: 1,
+        num: 1,
+        phone: this.phone,
+        addr: this.addr,
+        order_remark: "",
+      });
+      console.log();
+      if (res.data.status == "success") {
+        this.$router.push("/perfective");
+      }
+    },
+  },
   filters: {},
   computed: {},
   watch: {},
@@ -86,7 +143,9 @@ export default {
         margin-right: 4vw;
       }
       .right {
+        width: 70vw;
         p {
+          word-break: break-all;
           font-size: 0.28rem;
           font-weight: 600;
           line-height: 6vw;

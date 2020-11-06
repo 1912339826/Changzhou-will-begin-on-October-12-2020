@@ -19,6 +19,7 @@ let removePending = ele => {
 axios.defaults.timeout = 60000;
 axios.defaults.withCredentials = true
 
+
 axios.interceptors.request.use(config => {
   // 此处对请求的header进行配置
   // let cookies = Tools.getCookies(`${appConfig.simpleName}_access_token`) || {};
@@ -44,8 +45,10 @@ axios.interceptors.request.use(config => {
   config.data = (config.method === 'post' || config.method === 'put') ? qs.stringify(data) : null;
   config.headers['Content-Type'] = config.headers['Content-Type'] ? config.headers['Content-Type'] : 'application/x-www-form-urlencoded;charset=UTF-8';
   // config.headers['X-Client-HashID'] = window.localStorage.getItem("browserId");
-  config.headers['X-Client-HashID'] = "96lx83zx7o4ykw5m"
-  config.headers['Accept'] = "application/vnd.zhengqihao.v1+json"
+  config.headers['X-Client-HashID'] = "2vx0p9256e7ydjwz" //96lx83zx7o4ykw5m
+  config.headers['Accept'] = "application/vnd.zhengqihao.v1+json";
+  config.headers['X-CA-NONCE'] = window.localStorage.getItem("ca_nonce");
+  config.headers['X-Requested-With'] = "XMLHttpRequest";
   // if (config.headers['Content-Type'] == 'multipart/form-data') {
   //   //上传不需要序列化data 坑20190417
   // } else {
@@ -57,7 +60,7 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(
   response => {
     removePending(response.config);
-    console.log(response.data)
+    console.log(response.status)
     // // 因为登录过期,后台数据返回含有'登录超时，请重新登录'的字符串
     // if ((typeof response.data) == 'string') {
     //   if (response.data.indexOf("登录超时，请重新登录") != -1) {
@@ -81,9 +84,24 @@ axios.interceptors.response.use(
   },
   error => {
     console.log(error)
-    if (error.request.status === 404) {
-      // Tools.setCookies(`${appConfig.simpleName}_access_token`, null);
-      // location.reload();
+    if (error.status === 401) {
+      // 需要检测当前登录的接口
+      if (!window.localStorage.getItem("action")) {
+        let Token = window.android.getUserToken()
+        if (!!Token) {
+          // 获取Token
+          // getUserToken
+          window.localStorage.setItem("accessToken", Token)
+        } else {
+          // 登录
+          // jumpLogin
+          window.android.jumpLogin(window.location.href)
+        }
+        // Tools.setCookies(`${appConfig.simpleName}_access_token`, null);
+        // location.reload();
+      }
+
+
     }
   }
 );
@@ -98,13 +116,14 @@ export default function (url, data) {
       delete data[attr];
     });
   }
-  let method = url.match(/^(PUT|DELETE|GET|POST)\s/);
+  let method = url.match(/^(PUT|DELETE|GET|POST|PATCH)\s/);
   if (method) {
     url = url.replace(method[0], "");
     method = method[0].trim();
   } else {
     method = "GET";
   }
+
   switch (method.toLowerCase()) {
     case "delete":
       return axios.delete(url, {

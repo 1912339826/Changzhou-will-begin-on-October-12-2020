@@ -7,43 +7,69 @@
       <van-swipe-item>4</van-swipe-item>
     </van-swipe>
     <div class="integral_number">
-      <span>1669.8</span>
+      <span>{{ datas.price }}</span>
       <span>积分</span>
     </div>
     <div class="titile">
-      华为华为华为华为华为华为华为华为华为华为华为华为华为华为华为华为华为
+      {{ datas.product_name }}
     </div>
     <section>
       <div class="lists">
         <nav>购买须知</nav>
         <p>
-          本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保
+          {{ datas.product_remark }}
         </p>
       </div>
       <div class="lists">
         <nav>兑换规则</nav>
         <p>
-          本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保
+          {{ datas.product_remark2 }}
         </p>
       </div>
       <div class="lists">
         <nav>兑换规则</nav>
         <p>
-          本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保本产品全国联保
+          {{ datas.product_remark3 }}
         </p>
       </div>
     </section>
-    <!-- <div class="button_no button_">积分不足</div> -->
-    <div class="button_yes button_" @click="gonotarize">积分兑换</div>
+    <div class="button_no button_" v-if="Goodbuycheck == '积分不足'">
+      积分不足
+    </div>
+    <div class="button_yes button_" v-else @click="gonotarize">积分兑换</div>
   </div>
 </template>
 <script>
 export default {
   name: "productDetails",
+  created() {
+    this.getAppGooddetail();
+    this.getAppGoodbuycheck();
+  },
+  data() {
+    return {
+      datas: {},
+      Goodbuycheck: "",
+    };
+  },
   mounted() {},
   methods: {
     gonotarize() {
       this.$router.push("/notarize");
+    },
+    async getAppGooddetail() {
+      let res = await this.$req(window.api.getAppGooddetail, {
+        id: 1,
+      });
+      console.log(res.data.data.data);
+      this.datas = res.data.data.data;
+    },
+    async getAppGoodbuycheck() {
+      let res = await this.$req(window.api.getAppGoodbuycheck, {
+        id: 1,
+      });
+      console.log(res.data.data.data);
+      this.Goodbuycheck = res.data.data.data;
     },
   },
 };

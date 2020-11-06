@@ -10,28 +10,46 @@
           <div class="subText_text">{{ published_at }}</div>
         </div>
       </div>
-      <div class="right_no right" v-if="!show">关注</div>
-      <div class="right_yes right subText_text" v-else>已关注</div>
+      <div
+        class="right_no right"
+        v-if="follow_state == 0"
+        @click="subscription_media_account"
+      >
+        关注
+      </div>
+      <div
+        class="right_yes right subText_text"
+        v-if="follow_state == 1"
+        @click="subscription_media_account"
+      >
+        已关注
+      </div>
     </div>
 
     <div class="section">
-      <!-- <p v-html="html"></p> -->
+      <p v-html="html"></p>
     </div>
 
-    <div class="share">
+    <div class="share" v-if="can_share == 1">
       <img src="../../../static/images/weixin.png" alt="" />
       <img src="../../../static/images/QQ.png" alt="" />
       <img src="../../../static/images/weibo.png" alt="" />
     </div>
 
-    <div class="applaud applaud_no" v-if="!applaud">
-      <img src="../../../static/images/applaud_no.png" alt="" />
-      <div class="subText_text">{{like_count}}</div>
-    </div>
-    <div class="applaud applaud_yes" v-else>
-      <img src="../../../static/images/applaud_yes.png" alt="" />
-      <div>{{like_count}}</div>
-    </div>
+    <template v-if="can_like == 1">
+      <div
+        class="applaud applaud_no"
+        v-if="reader_status.like_status == 0"
+        @click="like_post"
+      >
+        <img src="../../../static/images/applaud_no.png" alt="" />
+        <div class="subText_text">{{ like_count }}</div>
+      </div>
+      <div class="applaud applaud_yes" v-else @click="like_post">
+        <img src="../../../static/images/applaud_yes.png" alt="" />
+        <div>{{ like_count }}</div>
+      </div>
+    </template>
 
     <div style="height: 6px; opacity: 1" class="subText"></div>
     <div class="recommend">
@@ -57,26 +75,43 @@
     <div class="hot_comments">
       <nav>热门评论</nav>
       <section v-if="comments">
-        <div class="list" v-for="(item, index) in 3" :key="index">
-          <img src="../../../static/images/header.png" alt="" class="header" />
+        <div
+          class="list"
+          v-for="(item, index) in comments_arr.slice(0, 4)"
+          :key="index"
+        >
+          <img :src="item.avatar" alt="" class="header" />
           <div class="right">
             <div class="name">
               <div class="name_left">
-                <p>为人名服务</p>
+                <p>{{ item.user_display_name }}</p>
               </div>
               <div class="name_right">
-                <span class="subText_text">44</span>
-                <img src="../../../static/images/applaud_no.png" alt="" />
+                <span class="subText_text">{{ item.like_count }}</span>
+                <img
+                  src="../../../static/images/applaud_yes.png"
+                  alt=""
+                  @click="comments_lick(item.id, index)"
+                  v-if="item.reader_status.like_status == 1"
+                />
+                <img
+                  src="../../../static/images/applaud_no.png"
+                  alt=""
+                  @click="comments_lick(item.id, index)"
+                  v-if="item.reader_status.like_status == 0"
+                />
               </div>
             </div>
-            <p class="date subText_text">44分钟前</p>
-            <div class="reply">
+            <p class="date subText_text">{{ item.created_at }}</p>
+            <!-- <div class="reply" v-if="item.commented_comments.data.length != 0">
               <span class="">回复</span
-              ><span class="subText_text"
-                >习近平指出，全球抗击新冠肺炎疫习近平指出，全球抗击新冠肺炎疫</span
-              >
-            </div>
-            <p class="content">习近平指出，全球抗击新冠肺炎疫情的实践</p>
+              ><span class="subText_text">{{
+                item.commented_comments.data[0].content
+              }}</span>
+            </div> -->
+            <p class="content">
+              {{ item.content }}
+            </p>
           </div>
         </div>
       </section>
@@ -87,36 +122,102 @@
     <div class="latest_comments" v-if="comments">
       <nav>最新评论</nav>
       <section>
-        <div class="list" v-for="(item, index) in 3" :key="index">
-          <img src="../../../static/images/header.png" alt="" class="header" />
-          <div class="right">
-            <div class="name">
-              <div class="name_left">
-                <p>为人名服务</p>
+        <van-list
+          v-model="loading"
+          :finished="finished"
+          finished-text="没有更多了"
+          @load="onLoad"
+        >
+          <!-- <van-cell v-for="item in list" :key="item" :title="item" /> -->
+          <div class="list" v-for="(item, index) in comments_arr" :key="index">
+            <img :src="item.avatar" alt="" class="header" />
+            <div class="right">
+              <div class="name">
+                <div class="name_left">
+                  <p>{{ item.user_display_name }}</p>
+                </div>
+                <div class="name_right">
+                  <span class="subText_text">{{ item.like_count }}</span>
+                  <img
+                    src="../../../static/images/applaud_yes.png"
+                    alt=""
+                    @click="comments_lick(item.id, index)"
+                    v-if="item.reader_status.like_status == 1"
+                  />
+                  <img
+                    src="../../../static/images/applaud_no.png"
+                    alt=""
+                    @click="comments_lick(item.id, index)"
+                    v-if="item.reader_status.like_status == 0"
+                  />
+                </div>
               </div>
-              <div class="name_right">
-                <span class="subText_text">44</span>
-                <img src="../../../static/images/applaud_yes.png" alt="" />
-              </div>
-            </div>
-            <p class="date subText_text">44分钟前</p>
-            <!-- <div class="reply">
-              <span class="">回复</span
-              ><span class="subText_text"
-                >习近平指出，全球抗击新冠肺炎疫习近平指出，全球抗击新冠肺炎疫</span
+              <p class="date subText_text">{{ item.created_at }}</p>
+              <!-- <div
+                class="reply"
+                v-if="item.commented_comments.data.length != 0"
               >
-            </div> -->
-            <p class="content">习近平指出，全球抗击新冠肺炎疫情的实践</p>
+                <span class="">回复</span
+                ><span class="subText_text">{{
+                  item.commented_comments.data[0].content
+                }}</span>
+              </div> -->
+              <p class="content">
+                {{ item.content }}
+              </p>
+            </div>
           </div>
-        </div>
+        </van-list>
       </section>
     </div>
     <div class="bottom">
       <!-- <input type="text" placeholder="说两句..." /> -->
       <van-field v-model="value" label="" placeholder="说两句..." />
-      <img src="../../../static/images/top.png" alt="" />
-      <img src="../../../static/images/collect_no.png" alt="" />
-      <img src="../../../static/images/share.png" alt="" />
+      <img
+        src="../../../static/images/top_this_daily.png"
+        alt=""
+        v-if="theme == 'this_daily'"
+        @click="go_top"
+      />
+      <img
+        src="../../../static/images/top_this_dark.png"
+        alt=""
+        v-if="theme == 'this_dark'"
+        @click="go_top"
+      />
+      <template v-if="can_comment == 1">
+        <img
+          src="../../../static/images/collect_yes.png"
+          alt=""
+          @click="collection_post"
+          v-if="reader_status.collect_status == 1"
+        />
+        <img
+          src="../../../static/images/collect_no_this_daily.png"
+          alt=""
+          @click="collection_post"
+          v-if="reader_status.collect_status == 0 && theme == 'this_daily'"
+        />
+
+        <img
+          src="../../../static/images/collect_no_this_dark.png"
+          alt=""
+          @click="collection_post"
+          v-if="reader_status.collect_status == 0 && theme == 'this_dark'"
+        />
+      </template>
+
+      <img
+        src="../../../static/images/share_this_daily.png"
+        alt=""
+        v-if="can_share == 1 && theme == 'this_daily'"
+      />
+
+      <img
+        src="../../../static/images/share_this_dark.png"
+        alt=""
+        v-if="can_share == 1 && theme == 'this_dark'"
+      />
     </div>
   </div>
 </template>
@@ -131,10 +232,25 @@ export default {
   props: {},
   data() {
     return {
+      loading: false,
+      finished: false,
+      // 评论总页数
+      total_pages: 1,
+      // 评论总数据量
+      total: 1,
+      // 评论当前页
+      current_page: 1,
+      // 关注状态
+      follow_state: 0,
+      view_count: 0,
+      theme: "",
+      can_comment: 1,
+      can_like: 1,
+      can_share: 1,
       like_count: 0,
-      show: true,
-      applaud: true,
+      applaud: false,
       comments: true,
+      comments_arr: [],
       value: "",
       html: "",
       title: "",
@@ -146,39 +262,183 @@ export default {
         },
       },
       recommend_arr: [],
+      reader_status: {
+        collect_status: 0,
+        like_status: 0,
+      },
     };
   },
   created() {
-    // this.recommend_accounts()
+    // 常州号 - 文稿详情
     this.post_api();
+    // 常州号 - 文稿详情 - 相关推荐
     this.related_post();
+
+    // 获取当前主题模式（白天或黑夜）
+    this.theme = window.localStorage.getItem("theme");
   },
-  mounted() {},
+  mounted() {
+    // https://www.cnblogs.com/yy136/p/9782725.html
+    window["comments_post_refresh"] = (data) => {
+      this.comments_post_refresh()
+    };
+    // window.comments_post_refresh()
+  },
   activated() {},
   update() {},
   methods: {
+    // 刷新评论列表
+    comments_post_refresh() {
+      this.comments_arr = [];
+      this.current_page = 1;
+      this.comments_post();
+    },
+    onLoad() {
+      // 异步更新数据
+      setTimeout(() => {
+        // 常州号 - 文稿详情 - 评论列表
+        this.comments_post();
+        console.log(this.comments_arr.length >= this.total_pages);
+      }, 1000);
+    },
+    go_top() {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+    },
+    // 常州号 - 文稿详情
     async post_api() {
-      let res = await this.$req(window.api.post_api + "96lx83zx7o4ykw5m", {});
-      console.log(res.data.data);
+      window.localStorage.setItem("action", false);
+      let res = await this.$req(window.api.post_api + "2vx0p9256e7ydjwz", {});
       let content = res.data.data;
       this.title = content.title;
       this.html = content.content;
       this.published_at = content.published_at;
       //   有关媒体的信息
       this.media_account = content.media_account;
-      this.like_count = content.like_count
+      this.follow_state = content.media_account.data.follow_state;
+      this.like_count = content.like_count;
+      this.reader_status = content.reader_status;
+      this.can_comment = content.can_comment;
+      this.can_like = content.can_like;
+      this.can_share = content.can_share;
+      // 阅读量
+      this.view_count = content.view_count;
+    },
+    // 常州号 - 文稿详情 - 点赞
+    async like_post() {
+      window.localStorage.setItem("action", true);
+      let res = await this.$req(
+        window.api.like_post + "2vx0p9256e7ydjwz/like",
+        {}
+      );
+      if (!!this.reader_status.like_status) {
+        this.like_count = this.like_count - 1;
+        this.reader_status.like_status = 0;
+      } else {
+        this.like_count = this.like_count + 1;
+        this.reader_status.like_status = 1;
+      }
+    },
+    // 评论点赞
+    async comments_lick(comments_id, index) {
+      window.localStorage.setItem("action", true);
+      let res = await this.$req(
+        window.api.like_comment + comments_id + "/like",
+        {}
+      );
+      if (this.comments_arr[index].reader_status.like_status == 0) {
+        this.comments_arr[index].reader_status.like_status = 1;
+        this.comments_arr[index].like_count++;
+      } else {
+        this.comments_arr[index].reader_status.like_status = 0;
+        this.comments_arr[index].like_count--;
+      }
     },
     // 常州号 - 文稿详情 - 相关推荐
     async related_post() {
+      window.localStorage.setItem("action", false);
       let res = await this.$req(
-        window.api.related_post + "96lx83zx7o4ykw5m/related",
+        window.api.related_post + "2vx0p9256e7ydjwz/related",
         {}
       );
       this.recommend_arr = res.data.data;
     },
+    // 常州号 - 文稿详情 - 收藏
+    async collection_post() {
+      window.localStorage.setItem("action", true);
+      let res = await this.$req(
+        window.api.collection_post + "2vx0p9256e7ydjwz/collection",
+        {}
+      );
+      if (!!this.reader_status.collect_status) {
+        this.reader_status.collect_status = 0;
+      } else {
+        this.reader_status.collect_status = 1;
+      }
+    },
+    // 常州号 - 文稿详情 - 评论列表
+    async comments_post() {
+      window.localStorage.setItem("action", false);
+      let box_barr = [];
+      let current_page = this.current_page + 1;
+      let res = await this.$req(
+        window.api.comments_post + "2vx0p9256e7ydjwz/comments",
+        {
+          page: current_page,
+        }
+      );
+      this.total_pages = res.data.meta.pagination.total_pages;
+      this.total = res.data.meta.pagination.total;
+      console.log(res.data.data);
+      box_barr = this.comments_arr.concat(res.data.data);
+      this.comments_arr = box_barr;
+      if (this.comments_arr.length == 0) {
+        this.comments = false;
+      } else {
+        this.comments = true;
+      }
+
+      // 数据全部加载完成
+      if (this.comments_arr.length >= this.total) {
+        this.finished = true;
+      }
+      // 加载状态结束
+      this.loading = false;
+      console.log(this.comments_arr);
+    },
+    // // 评论表单基础参数(发表评论前，获取ca_nonce)
+    // async options_comment(can, id) {
+    //   let res = await this.$req(window.api.options_comment, {});
+    //   window.localStorage.setItem("ca_nonce", res.data.data.ca_nonce);
+    //   // 评论文章
+    //   this.comment_post(can, id);
+    // },
+    // // 常州号 - 文稿详情 - 评论
+    // async comment_post(can, id) {
+    //   if (can == 1) {
+    //     let res = await this.$req(window.api.comment_post + id + "/comment", {
+    //       content: "6666",
+    //     });
+    //   }
+    // },
+    // 常州号 - 关注操作
+    async subscription_media_account() {
+      window.localStorage.setItem("action", true);
+      let id = this.media_account.data.hash_id;
+      let res = await this.$req(
+        window.api.subscription_media_account + id + "/subscription",
+        {}
+      );
+      if (this.follow_state == 0) {
+        this.follow_state = 1;
+        this.media_account.data.follow_state = 1;
+      } else {
+        this.follow_state = 0;
+        this.media_account.data.follow_state = 0;
+      }
+    },
+    //  常州号 - 推荐关注 测试用.....
     async recommend_accounts() {
       let res = await this.$req(window.api.recommend_accounts, {});
-      console.log(res);
     },
     // 点击相关推荐
     go(id) {
